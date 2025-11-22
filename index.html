@@ -3,108 +3,103 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ikun团队团长的个人主页</title>
+    <title>全屏惊喜弹出页</title>
     <style>
-        /* 页面基础样式 */
-        body {
+        * {
             margin: 0;
-            padding: 20px;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            background-color: #f0f0f0;
         }
-        .normal-content {
-            max-width: 800px;
-            margin: 0 auto;
-            background: white;
+        /* 迷惑性前缀内容 */
+        .prefix-content {
+            max-width: 700px;
+            margin: 50px auto;
             padding: 30px;
+            background: white;
             border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
         }
-        /* 弹出图片的样式（初始隐藏） */
-        .popup-img {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0); /* 初始缩小隐藏 */
-            max-width: 80%;
-            max-height: 80%;
-            border: 5px solid white;
-            border-radius: 15px;
-            box-shadow: 0 5px 30px rgba(0,0,0,0.3);
-            z-index: 1000;
-            transition: transform 0.5s ease; /* 弹出动画 */
+        .prefix-content h2 {
+            color: #333;
+            margin-bottom: 20px;
         }
-        /* 遮罩层（弹出时显示） */
-        .overlay {
+        .prefix-content p {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        /* 全屏弹出层（初始隐藏） */
+        .fullscreen-popup {
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 999;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.95); /* 深色背景突出图片 */
+            z-index: 9999;
             display: none; /* 初始隐藏 */
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            padding: 20px;
         }
-        /* 关闭按钮 */
-        .close-btn {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: red;
+        /* 弹出前缀提示文字 */
+        .popup-prefix {
             color: white;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            font-size: 20px;
-            cursor: pointer;
-            z-index: 1001;
-            display: none; /* 初始隐藏 */
+            font-size: 24px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            text-align: center;
+            animation: fadeIn 1s ease;
+        }
+        /* 全屏图片 */
+        .popup-image {
+            max-width: 100%;
+            max-height: 80vh; /* 留一点空间显示文字 */
+            object-fit: contain; /* 保持图片比例，不拉伸 */
+            animation: popIn 0.8s ease;
+        }
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes popIn {
+            from { transform: scale(0.5); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
 <body>
-    <!-- 正常显示的内容（迷惑朋友） -->
-    <div class="normal-content">
-        <h2>请帮我一个小忙～</h2>
-        <p>这个网页需要测试一下加载速度，麻烦你停留3秒，帮我看看有没有卡顿</p>
-        <p>正在加载测试数据... 10% → 30% → 60% → 90%...</p>
+    <!-- 前缀迷惑内容（可以修改成你想要的提示文字） -->
+    <div class="prefix-content">
+        <h2>据说只有运气好的人才能触发隐藏惊喜！</h2>
+        <p>请点击下方按钮，测试你的今日运势～</p>
+        <p>（提示：运气越好，惊喜越特别哦！）</p>
+        <button id="triggerBtn" style="margin-top: 20px; padding: 12px 30px; font-size: 18px; background: #4CAF50; color: white; border: none; border-radius: 5px; cursor: pointer;">测试我的运势</button>
     </div>
 
-    <!-- 遮罩层 -->
-    <div class="overlay" id="overlay"></div>
-
-    <!-- 弹出的图片（替换src为你想要的图片地址） -->
-    <img src="preview.jpg" alt="惊喜图片" class="popup-img" id="popupImg">
-
-    <!-- 关闭按钮 -->
-    <button class="close-btn" id="closeBtn">×</button>
+    <!-- 全屏弹出层 -->
+    <div class="fullscreen-popup" id="fullscreenPopup">
+        <!-- 弹出时的前缀文字（可修改） -->
+        <div class="popup-prefix">恭喜！你触发了超级惊喜！</div>
+        <!-- 全屏图片（替换src为你的图片地址） -->
+        <img src="preview.jpg" alt="全屏惊喜图片" class="popup-image" id="popupImage">
+    </div>
 
     <script>
         // 获取元素
-        const popupImg = document.getElementById('popupImg');
-        const overlay = document.getElementById('overlay');
+        const triggerBtn = document.getElementById('triggerBtn');
+        const fullscreenPopup = document.getElementById('fullscreenPopup');
         const closeBtn = document.getElementById('closeBtn');
 
-        // 延迟3秒后弹出（可修改setTimeout的第二个参数，单位毫秒）
-        setTimeout(() => {
-            popupImg.style.transform = 'translate(-50%, -50%) scale(1)'; // 放大显示
-            overlay.style.display = 'block'; // 显示遮罩
-            closeBtn.style.display = 'block'; // 显示关闭按钮
-        }, 3000);
-
-        // 点击关闭按钮隐藏
-        closeBtn.addEventListener('click', () => {
-            popupImg.style.transform = 'translate(-50%, -50%) scale(0)';
-            overlay.style.display = 'none';
-            closeBtn.style.display = 'none';
-        });
-
-        // 点击遮罩也可以关闭
-        overlay.addEventListener('click', () => {
-            popupImg.style.transform = 'translate(-50%, -50%) scale(0)';
-            overlay.style.display = 'none';
-            closeBtn.style.display = 'none';
+        // 方式1：点击按钮触发弹出（也可以保留延迟触发，把click事件换成setTimeout）
+        triggerBtn.addEventListener('click', () => {
+            fullscreenPopup.style.display = 'flex'; // 显示全屏弹出层
         });
     </script>
 </body>
