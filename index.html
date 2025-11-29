@@ -1,39 +1,166 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <title>一打七的网站</title>
+    <style>
+        body {
+            margin: 0;
+            font-family: "微软雅黑", "Arial", sans-serif;
+            background: #fafafa;
+        }
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 900px;
+        }
+        .header, .footer {
+            background: #cccccc;
+            text-align: center;
+        }
+        .header {
+            height: 80px;
+        }
+        .footer {
+            height: 60px;
+        }
+        .nav-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: #eeeeee;
+            height: 60px;
+            flex-wrap: wrap;
+        }
+        .nav-item {
+            margin: 0 20px;
+        }
+        .nav-item button {
+            width: 100px;
+            height: 44px;
+            font-size: 18px;
+            border-radius: 6px;
+            border: 1px solid #bbb;
+            background: #fff;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .nav-item button:hover {
+            background: #f2f2f2;
+        }
+        .nav-link {
+            font-size: 18px;
+            padding: 12px 20px;
+            text-decoration: none;
+            color: #333;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .nav-link:hover {
+            background: #ddd;
+        }
+        .sidebar, .rightbar {
+            background: #f5f5f5;
+            vertical-align: top;
+            width: 20%;
+        }
+        .sidebar h3, .rightbar h3 {
+            text-align: center;
+            margin-top: 24px;
+        }
+        .sidebar ul {
+            list-style-type: none;
+            padding-left: 0;
+            margin: 16px 0 0 0;
+        }
+        .sidebar ul li {
+            margin: 10px 0;
+            text-align: center;
+        }
+        .sidebar ul a {
+            text-decoration: none;
+            color: #555;
+            transition: color 0.2s;
+        }
+        .sidebar ul a:hover {
+            color: #1976d2;
+        }
+        .center-content {
+            text-align: center;
+            padding: 50px 0;
+            font-size: 22px;
+            font-weight: bold;
+            width: 60%;
+        }
+        .rightbar {
+            padding: 20px 0;
+            text-align: center;
+            min-width: 180px;
+        }
+        .rightbar p {
+            margin: 8px 0;
+        }
+        .rightbar hr {
+            margin: 16px 0;
+        }
+        @media (max-width: 900px) {
+            .main-table, .center-content, .sidebar, .rightbar {
+                width: 100% !important;
+                min-width: unset;
+            }
+            .nav-container {
+                flex-direction: column;
+                height: auto;
+            }
+            .nav-item {
+                margin: 5px 0;
+            }
+        }
+    </style>
 </head>
 <body>
-    <table border="0" width="100%" cellpadding="0" cellspacing="0">
+    <table class="main-table">
         <!-- HEAD -->
         <tr>
-            <td colspan="3" bgcolor="#cccccc" align="center" height="80">
+            <td colspan="3" class="header">
                 <h1>一打七的网站</h1>
             </td>
         </tr>
-        
+
         <!-- BODYTWO -->
-        <tr bgcolor="#eeeeee">
-            <td width="20%" align="center" height="40">
-                <a href="index.html"><button style="width: 100px; height: 50px; font-size: 20px;">首页</button></a>
-            </td>
-            <td width="20%" align="center">
-                <a href="luntan.html"><button style="width: 100px; height: 50px; font-size: 20px;">论坛</button></a>
-            </td>
-            <td width="20%" align="center">
-                <a href="i5ndex.html"><button style="width: 100px; height: 50px; font-size: 20px;">关于站长</button></a>
-            </td>
-            <td width="20%" align="center">
-                <a href="i5ndex.html"><button style="width: 100px; height: 50px; font-size: 20px;">关于站长</button></a>
+        <tr>
+            <td colspan="3">
+                <nav class="nav-container">
+                    <span class="nav-item">
+                        <a href="index.html">
+                            <button type="button">首页</button>
+                        </a>
+                    </span>
+                    <span class="nav-item">
+                        <a href="luntan.html">
+                            <button type="button">论坛</button>
+                        </a>
+                    </span>
+                    <span class="nav-item">
+                        <a href="i5ndex.html">
+                            <button type="button">站长</button>
+                        </a>
+                    </span>
+                    <span class="nav-item">
+                        <a class="nav-link" href="#">新闻资讯</a>
+                    </span>
+                    <span class="nav-item">
+                        <a class="nav-link" href="#">联系我们</a>
+                    </span>
+                </nav>
             </td>
         </tr>
-        
+
         <!-- BODY -->
         <tr>
             <!-- LEFT -->
-            <td width="20%" valign="top" bgcolor="#f5f5f5" height="400">
-                <h3 align="center">侧边栏</h3>
+            <td class="sidebar" height="400">
+                <h3>侧边栏</h3>
                 <ul>
                     <li><a href="#">链接1</a></li>
                     <li><a href="#">链接2</a></li>
@@ -41,24 +168,22 @@
                     <li><a href="#">链接4</a></li>
                 </ul>
             </td>
-            
-            <!--  -->
-            <td width="60%" valign="top" align="center">
-                <strong>不用想了，我就是宋尚达</strong>
+            <!-- MIDDLE -->
+            <td class="center-content">
+                不用想了，我就是宋尚达
             </td>
-            
             <!-- RIGHT -->
-            <td width="20%" valign="top" bgcolor="#f5f5f5">
-                <h3 align="center">最新动态</h3>
-                <p align="center">2025年11月29日<br>网站更新公告</p>
+            <td class="rightbar">
+                <h3>最新动态</h3>
+                <p>2025年11月29日<br>网站更新公告</p>
                 <hr>
-                <p align="center">联系方式: <br>邮箱: 3616904753@qq.com<br>微信: 15953150260</p>
+                <p>联系方式:<br>邮箱: 3616904753@qq.com<br>微信: 15953150260</p>
             </td>
         </tr>
-        
+
         <!-- FOOT -->
         <tr>
-            <td colspan="3" bgcolor="#cccccc" align="center" height="60">
+            <td colspan="3" class="footer">
                 <p>版权所有 &copy; 2025 一打七的网站-保留所有权利</p>
             </td>
         </tr>
