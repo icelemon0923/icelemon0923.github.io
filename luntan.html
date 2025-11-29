@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>简易论坛</title>
+    <style>
+        /* ...（同前）... */
+        body { font-family: Arial, "微软雅黑", sans-serif; background: #f8f8f8; margin: 0; }
+        .container { max-width: 620px; margin: 36px auto; background: #fff; border-radius: 6px; box-shadow: 0 2px 12px rgba(0,0,0,.05); padding: 24px 20px; }
+        h2 { margin-top: 0; }
+        .post-form { margin-bottom: 26px; }
+        .post-form input, .post-form textarea {
+            width: 99%; max-width: 600px;
+            margin-bottom: 12px;
+            font-size: 16px;
+            padding: 7px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            resize: vertical;
+        }
+        .post-form button {
+            font-size: 16px;
+            border: none;
+            background: #1976d2;
+            color: #fff;
+            padding: 9px 22px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .post-form button:hover { background: #1257a6; }
+        .posts { margin: 0; padding: 0; list-style: none; }
+        .post {
+            background: #f4f4f4;
+            margin-bottom: 18px;
+            border-radius: 4px;
+            padding: 10px 16px;
+        }
+        .post .author {
+            font-weight: bold;
+        }
+        .post .date {
+            color: #888;
+            font-size: 12px;
+            float: right;
+        }
+        .post .content {margin-top: 6px; white-space: pre-line;}
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>简易论坛</h2>
+    <form class="post-form" id="postForm" autocomplete="off">
+        <input type="text" id="author" placeholder="昵称" required>
+        <textarea id="content" rows="4" placeholder="内容" required></textarea>
+        <button type="submit">发帖</button>
+    </form>
+    <ul class="posts" id="posts"></ul>
+</div>
+<script>
+    // 列表渲染
+    function renderPosts(posts) {
+        const postsEl = document.getElementById('posts');
+        postsEl.innerHTML = '';
+        for (let i = posts.length - 1; i >= 0; i--) {
+            const post = posts[i];
+            const li = document.createElement('li');
+            li.className = 'post';
+            li.innerHTML = '<span class="author">' + 
+                (post.author ? post.author : '匿名') + 
+                '</span>' + 
+                '<span class="date">' + post.date + '</span>' +
+                '<div class="content">' + post.content.replace(/[<>&]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;'}[c];}) + '</div>';
+            postsEl.appendChild(li);
+        }
+    }
+    // 获取帖子列表
+    function fetchPosts() {
+        fetch('/api/list')
+            .then(r => r.json())
+            .then(data => renderPosts(data))
+            .catch(err => {});
+    }
+    fetchPosts(); // 页面启动加载
+    // 发帖
+    document.getElementById('postForm').onsubmit = function(e) {
+        e.preventDefault();
+        const author = document.getElementById('author').value.trim();
+        const content = document.getElementById('content').value.trim();
+        if (!content) return;
+        fetch('/api/create', {
+            method: 'POST',
+            headers: {'Content-Type':'application/json'},
+            body: JSON.stringify({author, content})
+        })
+        .then(r => r.json())
+        .then(data => {
+            document.getElementById('author').value = '';
+            document.getElementById('content').value = '';
+            fetchPosts(); // 发帖后刷新列表
+        });
+    };
+</script>
+</body>
+</html>
