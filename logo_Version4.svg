@@ -1,7 +1,0 @@
-<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
-  <circle cx="32" cy="32" r="28" fill="#338bc9"/>
-  <!-- 完美垂直居中单字母 -->
-  <text x="32" y="36" text-anchor="middle" font-size="32" font-family="Nunito, Segoe UI, Arial, sans-serif"
-        fill="#fff" font-weight="bold" alignment-baseline="middle" dominant-baseline="middle"
-        style="letter-spacing:1px;">I</text>
-</svg>
