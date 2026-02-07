@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MainPage - 主页</title>
+    <style>
+        *{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        a{
+            text-decoration: none; 
+            color: #333;
+        }
+        ul{
+            list-style: none;
+        }
+        .headh {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            background-color: #e6f7ff;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            z-index: 9999;
+            padding: 0 20px; 
+        }
+        .headh ul {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center; 
+            gap: 1px;
+        }
+        .headh li {
+            flex-shrink: 0;
+        }
+        .headh a {
+            display: block;
+            padding: 16px 24px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        .headh a:hover {
+            background-color: #b3e0ff;
+            color: #007acc;
+        }
+        main {
+            margin-top: 64px;
+            padding: 20px;
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        body {
+            background-color: #f8fcff;
+            min-height: 100vh;
+        }
+        .footest {
+            text-align: center;
+        }
+        .maintext {
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <noscript>
+        <div>
+            <strong style="color: rgb(224, 6, 6); ">抱歉！您的浏览器不支持JavaScript，无法显示该网页的内容！请更换浏览器重试。</strong>
+        </div>
+    </noscript>
+
+    <div>
+        <nav class="headh">
+            <ul>
+                <li><a href="index.html">首页</a></li>
+                <li><a href="#">产品</a></li>
+                <li><a href="#">关于</a></li>
+                <li><a href="#">论坛</a></li>
+                <li><a href="#">声明</a></li>
+                <li><a href="#">其它</a></li>
+            </ul>
+        </nav>
+    </div>
+    
+    <main>
+        <div clsaa="maintext">
+            <b><a href="http://www.algo-code.cn/group/1032" style="color: blue;">Algo-code</a></a>来的团队队员以及普通访客请阅读声明后再作浏览</b>
+        </div>
+    </main>
+
+    <footer class="footest">
+        <p>版权所有 © 2025 一打七的网站</p>
+        <div class="footest">
+            <a href="https://beian.miit.gov.cn/" style="color: rgb(198, 198, 198); text-decoration: none;">鲁公网备310982364720号</a>
+        </div>
+    </footer>
+</body>
+</html>
