@@ -1,0 +1,821 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=2.0, user-scalable=yes">
+    <title>频率稳定性 · 瓶盖 · 大数据优化版</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+            background: linear-gradient(145deg, #dee9f2 0%, #f0f5fc 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1300px;
+            width: 100%;
+            background: rgba(255,255,255,0.65);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-radius: 60px 60px 40px 40px;
+            box-shadow: 0 30px 50px rgba(0, 20, 50, 0.25), inset 0 1px 3px rgba(255,255,255,0.8);
+            padding: 32px 28px 24px 28px;
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.6);
+        }
+
+        h1 {
+            font-size: clamp(2.4rem, 9vw, 3.8rem);
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: #0b2542;
+            text-align: center;
+            margin: 0 0 18px 0;
+            padding-bottom: 10px;
+            border-bottom: 4px solid rgba(52, 102, 204, 0.25);
+            text-shadow: 3px 3px 6px rgba(255,255,255,0.7);
+        }
+
+        .button-panel {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 20px 0 20px 0;
+        }
+
+        .primary-btn, .secondary-btn {
+            border: none;
+            background: white;
+            padding: 18px 50px;
+            font-size: 1.9rem;
+            font-weight: 550;
+            border-radius: 70px;
+            box-shadow: 0 12px 22px rgba(0, 20, 60, 0.2), 0 3px 6px rgba(0,0,0,0.05);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.2, 0.9, 0.3, 1.3);
+            letter-spacing: 1px;
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+
+        .primary-btn {
+            background: #183c72;
+            color: white;
+            box-shadow: 0 14px 24px #183c72aa;
+        }
+
+        .primary-btn:hover {
+            background: #102b54;
+            transform: scale(1.03) translateY(-4px);
+            box-shadow: 0 22px 30px #183c72cc;
+        }
+
+        .secondary-btn {
+            background: #ecf2fa;
+            color: #0e2d4f;
+        }
+
+        .secondary-btn:hover {
+            background: #dae6f5;
+            transform: scale(1.03) translateY(-4px);
+            box-shadow: 0 22px 30px rgba(0,30,70,0.25);
+        }
+
+        /* 图表区域 — 精良卡片 */
+        .chart-wrapper {
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border-radius: 60px;
+            padding: 30px 22px 20px 22px;
+            margin: 28px 0 18px 0;
+            box-shadow: inset 0 1px 5px #fff9, 0 12px 28px rgba(0, 20, 50, 0.2);
+            transition: all 0.3s;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            padding: 0 18px 12px 18px;
+            font-size: 1.3rem;
+            color: #1e3c68;
+            font-weight: 500;
+        }
+
+        .chart-header span {
+            background: rgba(255,255,255,0.7);
+            padding: 10px 24px;
+            border-radius: 50px;
+            backdrop-filter: blur(4px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.02);
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+        }
+
+        canvas#freqChart {
+            width: 100%;
+            height: auto;
+            max-height: 360px;
+            background: rgba(255, 255, 255, 0.4);
+            border-radius: 48px;
+            display: block;
+            cursor: pointer;
+            box-shadow: 0 6px 18px rgba(0, 0, 0, 0.05);
+            transition: box-shadow 0.3s;
+            border: 2px solid rgba(255,255,255,0.7);
+        }
+
+        canvas#freqChart:hover {
+            box-shadow: 0 12px 36px rgba(20,60,140,0.25);
+        }
+
+        .chart-live-freq {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-top: 20px;
+            font-size: 1.5rem;
+            background: rgba(255,255,255,0.5);
+            padding: 16px 28px;
+            border-radius: 60px;
+            backdrop-filter: blur(4px);
+            color: #0b2c4a;
+        }
+
+        /* 统计卡片 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 18px;
+            margin: 28px 0 18px 0;
+            background: rgba(255,255,255,0.4);
+            backdrop-filter: blur(4px);
+            border-radius: 56px;
+            padding: 28px 22px;
+            border: 1px solid rgba(255,255,255,0.7);
+            box-shadow: inset 0 2px 5px #fff9, 0 8px 22px rgba(0,0,0,0.1);
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.7);
+            border-radius: 48px;
+            padding: 20px 10px;
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: #113355;
+            box-shadow: 0 6px 12px rgba(0,0,0,0.02);
+            border: 1px solid rgba(255,255,255,0.8);
+            transition: 0.2s;
+            backdrop-filter: blur(2px);
+        }
+
+        .stat-card span {
+            font-weight: 700;
+            font-size: 2rem;
+            display: block;
+            margin-top: 5px;
+            color: #0a2647;
+            letter-spacing: 0.5px;
+        }
+
+        /* 底部广告 */
+        .footer-ad {
+            text-align: center;
+            margin-top: 28px;
+            font-size: 1.2rem;
+        }
+
+        .footer-ad a {
+            text-decoration: none;
+            color: #113a63;
+            background: rgba(255,255,245,0.6);
+            padding: 10px 30px;
+            border-radius: 50px;
+            transition: all 0.3s;
+            border: 1px solid rgba(255,255,255,0.9);
+            display: inline-block;
+            backdrop-filter: blur(2px);
+            font-weight: 500;
+        }
+
+        .footer-ad a:hover {
+            background: white;
+            color: #041f3a;
+            box-shadow: 0 8px 18px #113a6370;
+            transform: scale(1.02);
+        }
+
+        /* 模态浮层 (保持不变) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(14px) saturate(200%);
+            -webkit-backdrop-filter: blur(14px) saturate(200%);
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: backdrop-filter 0.3s;
+        }
+
+        .modal-card {
+            width: min(750px, 90%);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 90px;
+            box-shadow: 0 40px 70px rgba(0, 20, 60, 0.5), 0 0 0 2px rgba(255,255,255,0.6) inset;
+            padding: 40px 30px;
+            text-align: center;
+            transition: transform 0.3s;
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+
+        .modal-card h2 {
+            font-size: 2.8rem;
+            font-weight: 500;
+            color: #0c2442;
+            margin-bottom: 30px;
+        }
+
+        .input-area input {
+            width: 240px;
+            padding: 22px 20px;
+            font-size: 2.4rem;
+            text-align: center;
+            border: none;
+            background: rgba(255,255,255,0.8);
+            border-radius: 70px;
+            margin: 15px 0 30px;
+            border: 2px solid rgba(255,255,255,0.9);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+            font-weight: 600;
+            color: #10233e;
+        }
+
+        .action-btn {
+            background: #1e3a6f;
+            border: none;
+            color: white;
+            font-size: 2.2rem;
+            padding: 18px 56px;
+            border-radius: 70px;
+            box-shadow: 0 16px 28px #1e3a6faa;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid rgba(255,255,255,0.5);
+        }
+
+        .action-btn:hover {
+            background: #0e2a52;
+            transform: scale(1.02) translateY(-4px);
+            box-shadow: 0 24px 34px #1e3a6fcc;
+        }
+
+        .anim-canvas-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin: 10px 0;
+        }
+
+        #flipCanvas {
+            width: 280px;
+            height: 280px;
+            background: rgba(220, 238, 255, 0.6);
+            border-radius: 90px;
+            box-shadow: 0 25px 35px rgba(0,0,0,0.15), inset 0 -5px 10px rgba(255,255,255,0.7);
+            margin: 10px auto;
+        }
+
+        .stats-row {
+            font-size: 2rem;
+            color: #112747;
+            display: flex;
+            justify-content: center;
+            gap: 50px;
+            margin: 20px 0 15px;
+            background: rgba(255,255,255,0.5);
+            padding: 18px 28px;
+            border-radius: 70px;
+        }
+
+        .skip-hint, .close-hint {
+            font-size: 1.5rem;
+            color: #1e3f6e;
+            background: rgba(240,248,255,0.6);
+            padding: 12px 30px;
+            border-radius: 60px;
+            display: inline-block;
+            margin-top: 18px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid rgba(255,255,255,0.7);
+        }
+        .skip-hint:hover, .close-hint:hover {
+            background: rgba(220,240,255,0.9);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📈 探究频率的稳定性 · 瓶盖</h1>
+        <div class="button-panel">
+            <button class="primary-btn" id="startBtn">🎲 开始抛掷瓶盖</button>
+            <button class="secondary-btn" id="clearBtn">🗑️ 清空所有数据</button>
+        </div>
+
+        <!-- 精良折线统计图区域 -->
+        <div class="chart-wrapper">
+            <div class="chart-header">
+                <span>⬆️ 朝上频率 (红色)</span>
+                <span>⬇️ 朝下频率 (蓝色)</span>
+            </div>
+            <div class="chart-container">
+                <canvas id="freqChart" width="900" height="360"></canvas>
+            </div>
+            <!-- 动态最新频率显示 -->
+            <div class="chart-live-freq" id="liveFreq">
+                <span>最新朝上: <strong id="liveUpFreq">0.000</strong></span>
+                <span>最新朝下: <strong id="liveDownFreq">0.000</strong></span>
+            </div>
+        </div>
+
+        <!-- 统计数据卡片 -->
+        <div class="stats-grid" id="statsGrid">
+            <div class="stat-card">总抛掷次数 <span id="statTotal">0</span></div>
+            <div class="stat-card">⬆️ 朝上次数 <span id="statUpCnt">0</span></div>
+            <div class="stat-card">⬆️ 朝上频率 <span id="statUpFreq">0.000</span></div>
+            <div class="stat-card">⬇️ 朝下次数 <span id="statDownCnt">0</span></div>
+            <div class="stat-card">⬇️ 朝下频率 <span id="statDownFreq">0.000</span></div>
+        </div>
+
+        <!-- 小广告 -->
+        <div class="footer-ad">
+            <a href="http://一打七的网站20230221.xyz" target="_blank">🔗 直达：一打七的网站20230221.xyz</a>
+        </div>
+    </div>
+
+    <!-- 全屏模态层 -->
+    <div class="modal" id="modal">
+        <div class="modal-card" id="modalCard">
+            <div id="inputState" class="input-area">
+                <h2>⚡ 抛掷几次瓶盖？</h2>
+                <input type="number" id="tossCount" min="1" max="1000" value="20" step="1">
+                <div><button class="action-btn" id="startTossBtn">开始抛</button></div>
+            </div>
+            <div id="animState" style="display: none;">
+                <h2 style="font-size: 2.4rem;">🌀 瓶盖旋转中</h2>
+                <div class="anim-canvas-box">
+                    <canvas id="flipCanvas" width="300" height="300"></canvas>
+                </div>
+                <div class="stats-row">
+                    <span>⬆️ 上: <span id="upCountAnim">0</span></span>
+                    <span>⬇️ 下: <span id="downCountAnim">0</span></span>
+                </div>
+                <div class="skip-hint" id="skipAnimHint">⏩ 单击任意位置跳过动画</div>
+            </div>
+            <div id="resultState" style="display: none;">
+                <h2>✅ 本次抛掷结果</h2>
+                <div style="font-size: 3rem; margin: 30px 0; background: rgba(220,240,255,0.6); border-radius: 90px; padding: 30px;">
+                    <div>⬆️ 朝上: <span id="finalUp">0</span></div>
+                    <div>⬇️ 朝下: <span id="finalDown">0</span></div>
+                </div>
+                <div class="close-hint" id="closeModalHint">👆 单击任意位置关闭</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---------- 全局数据 ----------
+            let allResults = [];          // true: 朝上, false: 朝下
+            let chartAnimationFrame = null;
+            let chartProgress = 1;         // 0..1
+            let skipChartAnimation = false;
+
+            // DOM 元素
+            const startBtn = document.getElementById('startBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const modal = document.getElementById('modal');
+            const inputState = document.getElementById('inputState');
+            const animState = document.getElementById('animState');
+            const resultState = document.getElementById('resultState');
+            const startTossBtn = document.getElementById('startTossBtn');
+            const tossCountInput = document.getElementById('tossCount');
+            const flipCanvas = document.getElementById('flipCanvas');
+            const ctxFlip = flipCanvas.getContext('2d');
+            const upCountAnim = document.getElementById('upCountAnim');
+            const downCountAnim = document.getElementById('downCountAnim');
+            const finalUp = document.getElementById('finalUp');
+            const finalDown = document.getElementById('finalDown');
+            const closeModalHint = document.getElementById('closeModalHint');
+            const freqChart = document.getElementById('freqChart');
+            const chartCtx = freqChart.getContext('2d');
+
+            // 统计卡片元素
+            const statTotal = document.getElementById('statTotal');
+            const statUpCnt = document.getElementById('statUpCnt');
+            const statUpFreq = document.getElementById('statUpFreq');
+            const statDownCnt = document.getElementById('statDownCnt');
+            const statDownFreq = document.getElementById('statDownFreq');
+            const liveUpFreq = document.getElementById('liveUpFreq');
+            const liveDownFreq = document.getElementById('liveDownFreq');
+
+            // 本次抛掷临时数据
+            let newResults = [];
+            let animInterval = null;
+            let currentAnimIndex = 0;
+            let animActive = false;
+            let upCount = 0, downCount = 0;
+
+            // ---------- 辅助函数：更新统计卡片 + 实时频率 ----------
+            function updateStats() {
+                const total = allResults.length;
+                const up = allResults.filter(v => v).length;
+                const down = total - up;
+                const upFreq = total ? (up / total) : 0;
+                const downFreq = total ? (down / total) : 0;
+
+                statTotal.innerText = total;
+                statUpCnt.innerText = up;
+                statDownCnt.innerText = down;
+                statUpFreq.innerText = upFreq.toFixed(4);
+                statDownFreq.innerText = downFreq.toFixed(4);
+                liveUpFreq.innerText = upFreq.toFixed(4);
+                liveDownFreq.innerText = downFreq.toFixed(4);
+            }
+
+            // ---------- 智能绘制折线图 (解决数据点过多重叠问题) ----------
+            function drawChart(progress) {
+                const w = freqChart.width;
+                const h = freqChart.height;
+                if (w < 10) return;
+                chartCtx.clearRect(0, 0, w, h);
+
+                const n = allResults.length;
+                if (n === 0) {
+                    chartCtx.font = 'bold 24px "Segoe UI"';
+                    chartCtx.fillStyle = '#2b4a77';
+                    chartCtx.textAlign = 'center';
+                    chartCtx.fillText('暂无抛掷数据', w/2, h/2);
+                    return;
+                }
+
+                const pointsToShow = Math.max(1, Math.floor(n * progress));
+                // 构建频率数组
+                let upCum = 0;
+                const freqUp = [];
+                const freqDown = [];
+                for (let i = 0; i < n; i++) {
+                    if (allResults[i]) upCum++;
+                    const total = i + 1;
+                    freqUp.push(upCum / total);
+                    freqDown.push((total - upCum) / total);
+                }
+
+                // 绘制网格
+                chartCtx.strokeStyle = '#b0c6e0';
+                chartCtx.lineWidth = 1;
+                for (let i = 0; i <= 5; i++) {
+                    let y = 40 + (h-80) * i/5;
+                    chartCtx.beginPath();
+                    chartCtx.moveTo(60, y);
+                    chartCtx.lineTo(w-40, y);
+                    chartCtx.strokeStyle = '#d0dff5';
+                    chartCtx.stroke();
+                }
+
+                // 绘制两条折线
+                const drawLine = (data, color) => {
+                    if (pointsToShow < 2) return;
+                    chartCtx.beginPath();
+                    chartCtx.strokeStyle = color;
+                    chartCtx.lineWidth = 3.5;
+                    chartCtx.lineJoin = 'round';
+                    chartCtx.shadowColor = '#ffffff';
+                    chartCtx.shadowBlur = 6;
+                    chartCtx.shadowOffsetX = 0;
+                    chartCtx.shadowOffsetY = 1;
+                    
+                    for (let i = 0; i < pointsToShow; i++) {
+                        const x = 60 + (i / (n-1 || 1)) * (w - 100);
+                        const y = h - 50 - (data[i] * (h - 100));
+                        if (i === 0) chartCtx.moveTo(x, y);
+                        else chartCtx.lineTo(x, y);
+                    }
+                    chartCtx.stroke();
+                    chartCtx.shadowBlur = 0;
+                };
+
+                drawLine(freqUp, '#c72f2f');
+                drawLine(freqDown, '#1f72b0');
+
+                // ---------- 智能绘制数据点 (根据数据量自适应) ----------
+                const totalPoints = pointsToShow;
+                
+                // 计算点的大小和透明度，数据越多点越小越透明
+                let pointRadius = 6;
+                let pointAlpha = 1.0;
+                let stride = 1;  // 采样步长，默认为1绘制所有点
+                
+                if (totalPoints > 300) {
+                    // 数据量极大时，减小点大小、增加透明度，并每隔几个点绘制一个
+                    pointRadius = 3;
+                    pointAlpha = 0.4;
+                    stride = Math.floor(totalPoints / 200) + 1;  // 控制在200个点左右
+                } else if (totalPoints > 150) {
+                    pointRadius = 4;
+                    pointAlpha = 0.6;
+                    stride = Math.floor(totalPoints / 150) + 1;
+                } else if (totalPoints > 80) {
+                    pointRadius = 5;
+                    pointAlpha = 0.8;
+                    stride = 2;
+                } else {
+                    pointRadius = 6;
+                    pointAlpha = 1;
+                    stride = 1;
+                }
+
+                // 为了更清晰，另外当点数非常多时采用热力图风格的散点
+                chartCtx.shadowBlur = 4;
+                chartCtx.shadowColor = 'rgba(255,255,255,0.8)';
+
+                for (let i = 0; i < pointsToShow; i += stride) {
+                    const x = 60 + (i / (n-1 || 1)) * (w - 100);
+                    const yUp = h - 50 - (freqUp[i] * (h - 100));
+                    const yDown = h - 50 - (freqDown[i] * (h - 100));
+
+                    // 朝上红点 (带透明度)
+                    chartCtx.beginPath();
+                    chartCtx.fillStyle = `rgba(199, 47, 47, ${pointAlpha})`;
+                    chartCtx.arc(x, yUp, pointRadius, 0, 2*Math.PI);
+                    chartCtx.fill();
+                    chartCtx.strokeStyle = 'white';
+                    chartCtx.lineWidth = pointRadius > 4 ? 2 : 1;
+                    chartCtx.stroke();
+
+                    // 朝下蓝点
+                    chartCtx.beginPath();
+                    chartCtx.fillStyle = `rgba(31, 114, 176, ${pointAlpha})`;
+                    chartCtx.arc(x, yDown, pointRadius, 0, 2*Math.PI);
+                    chartCtx.fill();
+                    chartCtx.strokeStyle = 'white';
+                    chartCtx.stroke();
+                }
+
+                // 额外标注最新频率数值（只有数据不太多时标注，避免混乱）
+                if (pointsToShow > 0 && totalPoints <= 200) {
+                    const lastIdx = pointsToShow - 1;
+                    const lastX = 60 + (lastIdx / (n-1 || 1)) * (w - 100);
+                    const lastYUp = h - 50 - (freqUp[lastIdx] * (h - 100));
+                    const lastYDown = h - 50 - (freqDown[lastIdx] * (h - 100));
+
+                    chartCtx.font = 'bold 16px "Segoe UI"';
+                    chartCtx.fillStyle = '#a52a2a';
+                    chartCtx.fillText(freqUp[lastIdx].toFixed(3), lastX + 15, lastYUp - 10);
+                    chartCtx.fillStyle = '#1f5b8e';
+                    chartCtx.fillText(freqDown[lastIdx].toFixed(3), lastX + 15, lastYDown + 20);
+                } else if (pointsToShow > 0) {
+                    // 数据量大时只显示最后一个点的大标注
+                    const lastIdx = pointsToShow - 1;
+                    const lastX = 60 + (lastIdx / (n-1 || 1)) * (w - 100);
+                    const lastYUp = h - 50 - (freqUp[lastIdx] * (h - 100));
+                    const lastYDown = h - 50 - (freqDown[lastIdx] * (h - 100));
+                    
+                    chartCtx.font = 'bold 14px "Segoe UI"';
+                    chartCtx.fillStyle = '#a52a2a';
+                    chartCtx.fillText('↑' + freqUp[lastIdx].toFixed(3), lastX + 12, lastYUp - 12);
+                    chartCtx.fillStyle = '#1f5b8e';
+                    chartCtx.fillText('↓' + freqDown[lastIdx].toFixed(3), lastX + 12, lastYDown + 24);
+                }
+            }
+
+            // 图表动画循环
+            function animateChart() {
+                if (skipChartAnimation) {
+                    chartProgress = 1;
+                } else {
+                    chartProgress += 0.015;
+                    if (chartProgress >= 1) chartProgress = 1;
+                }
+                drawChart(chartProgress);
+                if (chartProgress < 1) {
+                    chartAnimationFrame = requestAnimationFrame(animateChart);
+                } else {
+                    chartAnimationFrame = null;
+                }
+            }
+
+            // 单击图表跳过动画
+            freqChart.addEventListener('click', () => {
+                if (chartAnimationFrame) {
+                    skipChartAnimation = true;
+                }
+            });
+
+            // 刷新主界面
+            function refreshMainUI() {
+                updateStats();
+                if (chartAnimationFrame) cancelAnimationFrame(chartAnimationFrame);
+                chartProgress = 0;
+                skipChartAnimation = false;
+                animateChart();
+            }
+
+            // ---------- 瓶盖动画 ----------
+            function drawCap(angle, upPercent) {
+                ctxFlip.clearRect(0, 0, 300, 300);
+                ctxFlip.shadowColor = 'rgba(0,20,50,0.3)';
+                ctxFlip.shadowBlur = 22;
+                ctxFlip.shadowOffsetY = 5;
+                ctxFlip.save();
+                ctxFlip.translate(150, 150);
+                ctxFlip.rotate(angle);
+                ctxFlip.fillStyle = '#e8b84a';
+                ctxFlip.beginPath();
+                ctxFlip.ellipse(0, 12, 65, 32, 0, 0, Math.PI*2);
+                ctxFlip.fill();
+                ctxFlip.fillStyle = '#c9942c';
+                ctxFlip.beginPath();
+                ctxFlip.ellipse(0, -12, 65, 32, 0, 0, Math.PI*2);
+                ctxFlip.fill();
+                ctxFlip.fillStyle = '#fad161';
+                ctxFlip.shadowBlur = 28;
+                ctxFlip.beginPath();
+                ctxFlip.arc(0, -25, 32, 0, 2*Math.PI);
+                ctxFlip.fill();
+                ctxFlip.font = 'bold 26px "Segoe UI"';
+                ctxFlip.fillStyle = '#352812';
+                ctxFlip.shadowBlur = 10;
+                ctxFlip.fillText('⬆️', -35, -45);
+                ctxFlip.fillText('⬇️', 20, 40);
+                ctxFlip.restore();
+                ctxFlip.font = '20px monospace';
+                ctxFlip.fillStyle = '#0c2d50';
+                ctxFlip.fillText(`频率上: ${(upPercent*100).toFixed(1)}%`, 55, 270);
+            }
+
+            function startFlipAnimation() {
+                animActive = true;
+                currentAnimIndex = 0;
+                upCount = 0; downCount = 0;
+                const total = newResults.length;
+                if (total === 0) return;
+
+                if (animInterval) clearInterval(animInterval);
+                animInterval = setInterval(() => {
+                    if (!animActive) return;
+                    if (currentAnimIndex < total) {
+                        for (let step = 0; step < Math.max(1, Math.floor(total/50)); step++) {
+                            if (currentAnimIndex >= total) break;
+                            if (newResults[currentAnimIndex]) upCount++;
+                            else downCount++;
+                            currentAnimIndex++;
+                        }
+                        upCountAnim.innerText = upCount;
+                        downCountAnim.innerText = downCount;
+                        const angle = (currentAnimIndex / total) * Math.PI * 10;
+                        const upFreq = upCount / (currentAnimIndex || 1);
+                        drawCap(angle, upFreq);
+                        if (currentAnimIndex >= total) finishAnim();
+                    } else {
+                        finishAnim();
+                    }
+                }, 30);
+
+                function finishAnim() {
+                    if (animInterval) clearInterval(animInterval);
+                    animInterval = null;
+                    if (animActive) showResultState(upCount, downCount);
+                }
+            }
+
+            function skipToResult() {
+                if (!animActive) return;
+                animActive = false;
+                if (animInterval) clearInterval(animInterval);
+                upCount = newResults.filter(v => v).length;
+                downCount = newResults.length - upCount;
+                showResultState(upCount, downCount);
+            }
+
+            function showResultState(up, down) {
+                animState.style.display = 'none';
+                resultState.style.display = 'block';
+                finalUp.innerText = up;
+                finalDown.innerText = down;
+                drawCap(0, up/(up+down||1));
+            }
+
+            function closeModalAndSave() {
+                if (newResults.length > 0) {
+                    allResults.push(...newResults);
+                    newResults = [];
+                }
+                modal.style.display = 'none';
+                inputState.style.display = 'block';
+                animState.style.display = 'none';
+                resultState.style.display = 'none';
+                if (animInterval) clearInterval(animInterval);
+                animActive = false;
+                refreshMainUI();
+            }
+
+            // 事件绑定
+            startBtn.addEventListener('click', () => {
+                newResults = [];
+                inputState.style.display = 'block';
+                animState.style.display = 'none';
+                resultState.style.display = 'none';
+                modal.style.display = 'flex';
+                tossCountInput.value = 20;
+            });
+
+            startTossBtn.addEventListener('click', () => {
+                let n = parseInt(tossCountInput.value);
+                if (isNaN(n) || n < 1) n = 10;
+                if (n > 1000) n = 1000;  // 增加到1000次上限
+                tossN = n;
+                newResults = [];
+                for (let i = 0; i < tossN; i++) {
+                    newResults.push(Math.random() < 0.5);
+                }
+                inputState.style.display = 'none';
+                animState.style.display = 'block';
+                resultState.style.display = 'none';
+                upCountAnim.innerText = '0';
+                downCountAnim.innerText = '0';
+                startFlipAnimation();
+            });
+
+            clearBtn.addEventListener('click', () => {
+                if (chartAnimationFrame) cancelAnimationFrame(chartAnimationFrame);
+                allResults = [];
+                newResults = [];
+                refreshMainUI();
+                updateStats();
+                drawChart(1);
+            });
+
+            // 全屏点击跳过/关闭
+            modal.addEventListener('click', function(e) {
+                if (animActive && animState.style.display === 'block') {
+                    const target = e.target;
+                    if (target.tagName === 'INPUT' || target.tagName === 'BUTTON' || target.closest('button')) return;
+                    skipToResult();
+                }
+                if (resultState.style.display === 'block') {
+                    closeModalAndSave();
+                }
+            });
+
+            document.getElementById('modalCard').addEventListener('click', (e) => e.stopPropagation());
+            closeModalHint.addEventListener('click', (e) => {
+                e.stopPropagation();
+                closeModalAndSave();
+            });
+
+            // 窗口自适应
+            window.addEventListener('resize', () => {
+                const container = freqChart.parentNode;
+                if (container.clientWidth > 0) {
+                    freqChart.width = container.clientWidth;
+                    freqChart.height = 360;
+                }
+                drawChart(1);
+            });
+
+            // 初始化
+            setTimeout(() => {
+                const container = freqChart.parentNode;
+                freqChart.width = container.clientWidth;
+                freqChart.height = 360;
+                drawChart(1);
+                updateStats();
+            }, 50);
+        })();
+    </script>
+</body>
+</html>
