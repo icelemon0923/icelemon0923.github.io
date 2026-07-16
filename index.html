@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>搜尋</title>
+    <title>搜索</title>
     <style>
         * {
             margin: 0;
@@ -121,41 +121,29 @@
 </head>
 <body>
 <div class="wrap">
-    <div class="brand">搜尋</div>
+    <div class="brand">搜索</div>
     <form id="searchForm" class="search-box" action="#">
-        <input type="text" id="searchInput" placeholder="輸入關鍵字..." autocomplete="off" spellcheck="false" />
-        <button type="submit" id="searchBtn">搜尋</button>
+        <input type="text" id="searchInput" placeholder="输入关键字..." autocomplete="off" spellcheck="false" />
+        <button type="submit" id="searchBtn">搜索</button>
     </form>
-    <div class="footer">此站點僅為個人測試站點，誤入請退出</div>
+    <div class="footer">此站点仅为个人测试站点，误入请退出</div>
 </div>
 <script>
     (function() {
         "use strict";
-        // 【特殊連結】關鍵字 → 目標 URL（精確比對，不分大小寫）
-        const map = new Map(['X3E09C23E45Rt001', 'Login.html']);
-
-        const fallback = 'https://www.baidu.com';
-        
-        const form = document.getElementById('searchForm');
-        const input = document.getElementById('searchInput');
-
+        var map = new Map([
+            ['x3e09c23e45rt001', 'Login.html']
+        ]);
+        var fallback = 'https://www.baidu.com';
+        var form = document.getElementById('searchForm');
+        var input = document.getElementById('searchInput');
         form.addEventListener('submit', function(e) {
             e.preventDefault();
-            const raw = input.value.trim();
-            if (raw === '') {
-                window.location.href = fallback;
-                return;
-            }
-            const key = raw.toLowerCase();
-            const target = map.get(key);
-            if (target) {
-                window.location.href = target;
-            } else {
-                alert('該網站維修中，請使用百度搜尋。');
-                window.location.href = fallback;
-            }
+            var raw = input.value.trim();
+            var key = raw.toLowerCase();
+            var target = map.get(key);
+            window.location.href = target || fallback;
         });
-
         input.focus();
     })();
 </script>
