@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>搜尋</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Roboto, Arial, sans-serif;
+        }
+        body {
+            background: #f5f7fa;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .wrap {
+            background: #ffffff;
+            border: 1px solid #d0d7de;
+            border-radius: 12px;
+            padding: 32px 36px 28px;
+            max-width: 640px;
+            width: 100%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.04);
+        }
+        .brand {
+            font-size: 22px;
+            font-weight: 500;
+            color: #1f2a3a;
+            margin-bottom: 20px;
+            letter-spacing: 0.2px;
+        }
+        .search-box {
+            display: flex;
+            align-items: stretch;
+            background: #ffffff;
+            border: 1px solid #ccd4de;
+            border-radius: 8px;
+            transition: border-color 0.15s;
+        }
+        .search-box:focus-within {
+            border-color: #1a73e8;
+            box-shadow: 0 0 0 3px rgba(26,115,232,0.12);
+        }
+        .search-box input {
+            flex: 1;
+            border: none;
+            outline: none;
+            padding: 12px 16px;
+            font-size: 16px;
+            color: #1f2a3a;
+            background: transparent;
+            min-width: 0;
+        }
+        .search-box input::placeholder {
+            color: #9aabbf;
+        }
+        .search-box button {
+            background: #1a73e8;
+            border: none;
+            color: #fff;
+            font-size: 15px;
+            font-weight: 500;
+            padding: 0 28px;
+            cursor: pointer;
+            border-radius: 0 8px 8px 0;
+            transition: background 0.15s;
+            flex-shrink: 0;
+        }
+        .search-box button:hover {
+            background: #1557b0;
+        }
+        .search-box button:active {
+            background: #0f4a96;
+        }
+        .quick {
+            margin-top: 24px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px 14px;
+            padding-top: 16px;
+            border-top: 1px solid #eaeef2;
+        }
+        .quick-item {
+            background: #f0f3f7;
+            padding: 4px 16px;
+            border-radius: 30px;
+            font-size: 14px;
+            color: #2c3e50;
+            border: 1px solid #dce3ec;
+            cursor: pointer;
+            transition: background 0.1s;
+            user-select: none;
+        }
+        .quick-item:hover {
+            background: #e4e9f1;
+        }
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #889bb0;
+            border-top: 1px solid #eaeef2;
+            padding-top: 16px;
+            letter-spacing: 0.3px;
+        }
+        @media (max-width: 480px) {
+            .wrap { padding: 24px 16px 24px; }
+            .search-box input { font-size: 15px; padding: 10px 14px; }
+            .search-box button { padding: 0 18px; font-size: 14px; }
+        }
+        @media (max-width: 380px) {
+            .search-box {
+                flex-wrap: wrap;
+                background: transparent;
+                border: none;
+                box-shadow: none;
+                gap: 8px;
+            }
+            .search-box input {
+                background: #fff;
+                border: 1px solid #ccd4de;
+                border-radius: 8px;
+                width: 100%;
+            }
+            .search-box button {
+                width: 100%;
+                border-radius: 8px;
+                padding: 12px;
+            }
+            .search-box:focus-within { box-shadow: none; }
+            .search-box input:focus {
+                border-color: #1a73e8;
+                box-shadow: 0 0 0 3px rgba(26,115,232,0.12);
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="brand">搜尋</div>
+    <form id="searchForm" class="search-box" action="#">
+        <input type="text" id="searchInput" placeholder="輸入關鍵字..." autocomplete="off" spellcheck="false" />
+        <button type="submit" id="searchBtn">搜尋</button>
+    </form>
+    <div class="quick">
+        <span class="quick-item" data-keyword="github">github</span>
+        <span class="quick-item" data-keyword="docs">docs</span>
+        <span class="quick-item" data-keyword="lab">lab</span>
+        <span class="quick-item" data-keyword="play">play</span>
+        <span class="quick-item" data-keyword="mdn">mdn</span>
+    </div>
+    <div class="footer">此站點僅為個人測試站點，誤入請退出</div>
+</div>
+<script>
+    (function() {
+        "use strict";
+
+        // ========== 跳轉配置（修改此處即可） ==========
+        // 特定關鍵字 → 目標URL
+        const map = new Map([
+            ['github', 'https://github.com'],
+            ['docs', 'https://docs.python.org/3/'],
+            ['lab', 'https://jupyter.org/try'],
+            ['play', 'https://play.google.com/store/games'],
+            ['mdn', 'https://developer.mozilla.org/zh-CN/']
+        ]);
+        // 預設跳轉位址（其他所有輸入）
+        const fallback = 'https://www.baidu.com';
+        // =============================================
+
+        const form = document.getElementById('searchForm');
+        const input = document.getElementById('searchInput');
+
+        // ========== 跳轉處理邏輯 ==========
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const raw = input.value.trim();
+            if (raw === '') {
+                window.location.href = fallback;
+                return;
+            }
+            const key = raw.toLowerCase();
+            const target = map.get(key);
+            window.location.href = target || fallback;
+        });
+        // ==================================
+
+        document.querySelectorAll('.quick-item').forEach(el => {
+            el.addEventListener('click', function() {
+                input.value = this.dataset.keyword;
+                input.focus();
+            });
+        });
+
+        input.focus();
+    })();
+</script>
+</body>
+</html>
