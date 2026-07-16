@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
+  <title>三重驗證</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Courier New', monospace;
+    }
+    body {
+      min-height: 100vh;
+      background: #0b0b0b;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .login-card {
+      max-width: 340px;
+      width: 100%;
+      background: #0f0f0f;
+      border: 1px solid #3f1a1a;
+      border-radius: 8px;
+      padding: 1.8rem 1.5rem 1.6rem;
+      box-shadow: 0 0 20px rgba(200, 30, 30, 0.1);
+    }
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 1px solid #3f1a1a;
+    }
+    .login-card h1 {
+      font-size: 1.1rem;
+      color: #d93a3a;
+      letter-spacing: 3px;
+      text-shadow: 0 0 10px rgba(220, 40, 40, 0.3);
+    }
+    .lang-toggle {
+      display: flex;
+      gap: 4px;
+    }
+    .lang-toggle button {
+      background: transparent;
+      border: 1px solid #3f1a1a;
+      color: #7a3a3a;
+      padding: 0.1rem 0.5rem;
+      border-radius: 3px;
+      font-size: 0.6rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      font-family: 'Courier New', monospace;
+    }
+    .lang-toggle button:hover {
+      border-color: #8a2a2a;
+      color: #b53b3b;
+    }
+    .lang-toggle button.active {
+      border-color: #b33a3a;
+      color: #d93a3a;
+      background: #1a0a0a;
+    }
+    .input-group {
+      margin-bottom: 1rem;
+    }
+    .input-group label {
+      display: block;
+      font-size: 0.65rem;
+      color: #b53b3b;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      margin-bottom: 0.2rem;
+      margin-left: 0.2rem;
+    }
+    .input-group input {
+      width: 100%;
+      padding: 0.6rem 0.8rem;
+      font-size: 0.9rem;
+      background: #141414;
+      border: 1px solid #2e1a1a;
+      border-radius: 4px;
+      outline: none;
+      color: #e0c0c0;
+      transition: all 0.15s ease;
+      box-shadow: inset 0 0 8px rgba(0,0,0,0.8);
+    }
+    .input-group input:focus {
+      border-color: #b33a3a;
+      background: #0e0e0e;
+      box-shadow: 0 0 12px rgba(200, 40, 40, 0.15), inset 0 0 8px rgba(200, 30, 30, 0.05);
+      color: #f0d0d0;
+    }
+    .input-group input::placeholder {
+      color: #5a2a2a;
+      opacity: 0.5;
+      letter-spacing: 0.3px;
+      font-size: 0.8rem;
+    }
+    .input-group .invite-wrapper {
+      position: relative;
+    }
+    .input-group .invite-wrapper input {
+      padding-right: 3.2rem;
+    }
+    .input-group .invite-toggle {
+      position: absolute;
+      right: 6px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: transparent;
+      border: 1px solid #3f1a1a;
+      color: #7a3a3a;
+      font-size: 0.55rem;
+      cursor: pointer;
+      padding: 2px 8px;
+      border-radius: 3px;
+      transition: all 0.15s ease;
+      font-family: 'Courier New', monospace;
+      letter-spacing: 0.3px;
+    }
+    .input-group .invite-toggle:hover {
+      color: #b53b3b;
+      border-color: #8a2a2a;
+      background: #1a0a0a;
+    }
+    .btn-login {
+      width: 100%;
+      padding: 0.7rem;
+      margin-top: 0.5rem;
+      background: #1f0a0a;
+      border: 1.5px solid #5a1a1a;
+      border-radius: 4px;
+      color: #d93a3a;
+      font-size: 0.95rem;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.12s ease;
+      text-shadow: 0 0 10px rgba(200, 30, 30, 0.2);
+    }
+    .btn-login:hover:not(:disabled) {
+      background: #2a0e0e;
+      border-color: #8a2a2a;
+      box-shadow: 0 0 20px rgba(200, 30, 30, 0.15);
+    }
+    .btn-login:active:not(:disabled) {
+      transform: scale(0.97);
+      background: #120606;
+    }
+    .btn-login:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+      filter: grayscale(0.5);
+    }
+    #status {
+      text-align: center;
+      margin-top: 1rem;
+      font-size: 0.7rem;
+      color: #7a3a3a;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      min-height: 1.6rem;
+      transition: 0.15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    #status.success {
+      color: #d93a3a;
+      text-shadow: 0 0 12px rgba(200, 30, 30, 0.25);
+    }
+    #status.error {
+      color: #b53b3b;
+      text-shadow: 0 0 12px rgba(200, 0, 0, 0.25);
+    }
+    #status.locked {
+      color: #8a3a3a;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    #status.welcome {
+      color: #d93a3a;
+      font-size: 0.9rem;
+      font-weight: 700;
+      text-shadow: 0 0 20px rgba(200, 30, 30, 0.4);
+      animation: none;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 1.5rem 1.2rem 1.4rem;
+      }
+      .login-card h1 {
+        font-size: 1rem;
+      }
+      .input-group input {
+        padding: 0.5rem 0.7rem;
+        font-size: 0.85rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="login-card">
+    <div class="header">
+      <h1 id="title">ACCESS</h1>
+      <div class="lang-toggle">
+        <button id="langEn">EN</button>
+        <button id="langZh" class="active">繁</button>
+      </div>
+    </div>
+
+    <!-- 用戶名 -->
+    <div class="input-group">
+      <label id="labelUser">用戶名</label>
+      <input type="text" id="username" placeholder="請輸入用戶名" autocomplete="username">
+    </div>
+
+    <!-- 密碼 -->
+    <div class="input-group">
+      <label id="labelPass">密碼</label>
+      <input type="password" id="password" placeholder="請輸入密碼" autocomplete="current-password">
+    </div>
+
+    <!-- 邀請碼 -->
+    <div class="input-group">
+      <label id="labelInvite">邀請碼</label>
+      <div class="invite-wrapper">
+        <input type="password" id="invite" placeholder="請輸入邀請碼" autocomplete="off">
+        <button class="invite-toggle" id="inviteToggle">顯示</button>
+      </div>
+    </div>
+
+    <button class="btn-login" id="loginBtn">提交</button>
+    <div id="status">等待輸入</div>
+  </div>
+
+  <script>
+    (function() {
+      // ========== 改這裡 ==========
+      const U = 'XXX';      // 用戶名
+      const P = 'XXX';      // 密碼
+      const I = 'XXX';      // 邀請碼
+      const URL = 'https://example.com/dashboard';  // 跳轉地址
+      // ==========================
+
+      const u = document.getElementById('username');
+      const p = document.getElementById('password');
+      const i = document.getElementById('invite');
+      const btn = document.getElementById('loginBtn');
+      const st = document.getElementById('status');
+      const title = document.getElementById('title');
+      const labelUser = document.getElementById('labelUser');
+      const labelPass = document.getElementById('labelPass');
+      const labelInvite = document.getElementById('labelInvite');
+      const inviteToggle = document.getElementById('inviteToggle');
+      const langEn = document.getElementById('langEn');
+      const langZh = document.getElementById('langZh');
+
+      let locked = false;
+      let failCount = 0;
+      let currentLang = 'zh';
+
+      const texts = {
+        en: {
+          title: 'ACCESS',
+          user: 'USERNAME',
+          pass: 'PASSWORD',
+          invite: 'INVITE CODE',
+          userPlace: 'ENTER USERNAME',
+          passPlace: 'ENTER PASSWORD',
+          invitePlace: 'ENTER INVITE CODE',
+          submit: 'SUBMIT',
+          awaiting: 'AWAITING INPUT',
+          ready: 'READY · CLICK SUBMIT',
+          wait: 'PLEASE WAIT...',
+          fill: 'PLEASE FILL IN ALL FIELDS',
+          locked: 'YOU ARE NOT OUR GUEST · LOCKED ',
+          seconds: 'S',
+          show: 'SHOW',
+          hide: 'HIDE',
+          welcome: 'WELCOME, DEAR MEMBER'
+        },
+        zh: {
+          title: 'ACCESS',
+          user: '用戶名',
+          pass: '密碼',
+          invite: '邀請碼',
+          userPlace: '請輸入用戶名',
+          passPlace: '請輸入密碼',
+          invitePlace: '請輸入邀請碼',
+          submit: '提交',
+          awaiting: '等待輸入',
+          ready: '就緒 · 點擊提交',
+          wait: '請稍候...',
+          fill: '請填寫所有欄位',
+          locked: '您並不是我們的賓客 · 鎖定 ',
+          seconds: '秒',
+          show: '顯示',
+          hide: '隱藏',
+          welcome: '歡迎，親愛的會員'
+        }
+      };
+
+      function setStatus(msg, type) {
+        st.textContent = msg;
+        st.className = type || '';
+      }
+
+      function lockOut(duration) {
+        locked = true;
+        btn.disabled = true;
+        let remaining = duration;
+        const t = texts[currentLang];
+        setStatus(t.locked + remaining + t.seconds, 'locked');
+        const interval = setInterval(() => {
+          remaining--;
+          if (remaining <= 0) {
+            clearInterval(interval);
+            locked = false;
+            btn.disabled = false;
+            setStatus(t.awaiting, '');
+          } else {
+            setStatus(t.locked + remaining + t.seconds, 'locked');
+          }
+        }, 1000);
+      }
+
+      function applyLanguage(lang) {
+        currentLang = lang;
+        const t = texts[lang];
+        title.textContent = t.title;
+        labelUser.textContent = t.user;
+        labelPass.textContent = t.pass;
+        labelInvite.textContent = t.invite;
+        u.placeholder = t.userPlace;
+        p.placeholder = t.passPlace;
+        i.placeholder = t.invitePlace;
+        btn.textContent = t.submit;
+        inviteToggle.textContent = i.type === 'password' ? t.show : t.hide;
+
+        langEn.className = lang === 'en' ? 'active' : '';
+        langZh.className = lang === 'zh' ? 'active' : '';
+
+        if (!locked) {
+          const un = u.value.trim();
+          const pw = p.value.trim();
+          const inv = i.value.trim();
+          if (un === U && pw === P && inv === I) {
+            setStatus(t.ready, 'success');
+          } else if (!un && !pw && !inv) {
+            setStatus(t.awaiting, '');
+          } else {
+            setStatus(t.awaiting, '');
+          }
+        } else {
+          const remaining = st.textContent.match(/\d+/);
+          if (remaining) {
+            setStatus(t.locked + remaining[0] + t.seconds, 'locked');
+          }
+        }
+      }
+
+      function check() {
+        if (locked) return;
+
+        const un = u.value.trim();
+        const pw = p.value.trim();
+        const inv = i.value.trim();
+        const t = texts[currentLang];
+
+        if (!un || !pw || !inv) {
+          setStatus(t.fill, 'error');
+          return;
+        }
+
+        if (un === U && pw === P && inv === I) {
+          setStatus(t.welcome, 'welcome');
+          btn.disabled = true;
+          setTimeout(() => {
+            window.location.href = URL;
+          }, 1200);
+        } else {
+          failCount++;
+          if (failCount >= 2) {
+            lockOut(600);
+          } else {
+            lockOut(60);
+          }
+        }
+      }
+
+      inviteToggle.addEventListener('click', function() {
+        const t = texts[currentLang];
+        if (i.type === 'password') {
+          i.type = 'text';
+          inviteToggle.textContent = t.hide;
+        } else {
+          i.type = 'password';
+          inviteToggle.textContent = t.show;
+        }
+      });
+
+      btn.addEventListener('click', check);
+
+      [u, p, i].forEach(el => {
+        el.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') {
+            e.preventDefault();
+            check();
+          }
+        });
+        el.addEventListener('input', function() {
+          if (locked) return;
+          const t = texts[currentLang];
+          const un = u.value.trim();
+          const pw = p.value.trim();
+          const inv = i.value.trim();
+          if (un === U && pw === P && inv === I) {
+            setStatus(t.ready, 'success');
+          } else {
+            setStatus(t.awaiting, '');
+          }
+        });
+      });
+
+      langEn.addEventListener('click', function() { applyLanguage('en'); });
+      langZh.addEventListener('click', function() { applyLanguage('zh'); });
+
+      applyLanguage('zh');
+    })();
+  </script>
+</body>
+</html>
