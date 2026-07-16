@@ -131,27 +131,11 @@
 <script>
     (function() {
         "use strict";
-
-        // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-        // ★ 跳轉配置區 — 修改下方 map 和 fallback 即可        ★
-        // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-
         // 【特殊連結】關鍵字 → 目標 URL（精確比對，不分大小寫）
-        const map = new Map([
-            ['github', 'https://github.com'],          // ← 修改此處 URL
-            ['docs', 'https://docs.python.org/3/'],    // ← 修改此處 URL
-            ['lab', 'https://jupyter.org/try'],        // ← 修改此處 URL
-            ['play', 'https://play.google.com/store/games'], // ← 修改此處 URL
-            ['mdn', 'https://developer.mozilla.org/zh-CN/']  // ← 修改此處 URL
-        ]);
+        const map = new Map(['X3E09C23E45Rt001', 'Login.html']);
 
-        // 【預設跳轉】非特殊關鍵字跳轉此處（目前為百度）
-        const fallback = 'https://www.baidu.com';       // ← 修改此處 URL
-
-        // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-        // ★ 以下為核心邏輯，無需修改                      ★
-        // ★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★
-
+        const fallback = 'https://www.baidu.com';
+        
         const form = document.getElementById('searchForm');
         const input = document.getElementById('searchInput');
 
